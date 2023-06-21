@@ -21,8 +21,7 @@ struct vetor_letras{
 typedef struct vetor_letras LETRAS;
 
 LETRAS vet_l[26];
-int cont_max=1;
-int cont_palavras=0;
+int maior_cont;
 
 void mostrar_opcoes() {
 	printf("================================\n");
@@ -30,29 +29,22 @@ void mostrar_opcoes() {
 	printf("  1. Inserir palavra\n");
 	printf("  2. Consultar Palavra\n");
 	printf("  3. Remover Palavra\n");
-//	printf("  4. Contar palavras\n");
-//	printf("  5. Conta ocorrencias\n");
+	printf("  4. Contar palavras\n");
+	printf("  5. Conta ocorrencias\n");
 	printf("  6. Exibe palavras\n");
-//	printf("  7. Exibe palavras letra\n");
-//	printf("  8. Exibe palavras maior ocorren.\n");
-//	printf("  9. Exibe palavras uma ocorren.\n");
+	printf("  7. Exibe palavras letra\n");
+	printf("  8. Exibe palavras maior ocorren.\n");
+	printf("  9. Exibe palavras uma ocorren.\n");
 //	printf("  10. Extra?");
 	printf("================================\n");
 	printf("\n");
 }
 
-void teste_cont(int cont){
-	if(cont > cont_max){
-		cont_max = cont;
-	} 
-}
 
 void insereNodo( NODE* atual, NODE* novo ){
 	if(strcmp(atual->palavra,novo->palavra) == 0){
 	  	atual->cont++;
-	  	teste_cont(atual->cont);
 	  	printf("Palavra '%s' ja existe, aumentando cont!\n", novo->palavra);
-	  	cont_palavras++;
 	  	return;
 	}
 	else if( strcmp(novo->palavra,atual->palavra) == -1){
@@ -60,7 +52,6 @@ void insereNodo( NODE* atual, NODE* novo ){
 			atual->esq = novo;
 	 		atual->esq->pai = atual; //seta o pai
 	 		printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
-	  		cont_palavras++;
 	  	}
 	  	else{
 	  		insereNodo( atual->esq, novo);
@@ -71,7 +62,6 @@ void insereNodo( NODE* atual, NODE* novo ){
 	  			atual->dir = novo;
 	  			atual->dir->pai = atual;
 	  			printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
-	  			cont_palavras++;
 	  		}
 	  		else{
 	  		  insereNodo( atual->dir, novo );
@@ -93,7 +83,6 @@ void insere_palavra(char palavra[50]){
 	if(vet_l[r].prox == NULL){
 		vet_l[r].prox = novo;
 		printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
-		cont_palavras++;
 	}
 	else{
 		  insereNodo( vet_l[r].prox, novo );
@@ -132,9 +121,8 @@ void insere_palavra(char palavra[50]){
 		strcpy(aux, atual->palavra);
 		char c = toupper(aux[0]);
 		int i = c - 'A';
-		NODE* raiz = vet_l[i].prox;
 		if(pai==NULL){ 
-			raiz = NULL;
+			vet_l[i].prox = NULL;
 		}
 		else{
 			if(pai->esq == atual){
@@ -210,14 +198,15 @@ void insere_palavra(char palavra[50]){
 		else if((atual->esq == NULL) && (atual->dir == NULL)){
     		removeFolha(atual);
 		}
-    	else{
+		else{
 			if((atual->esq != NULL) && (atual->dir != NULL)){
 				removeDoisFilhos( atual );
 			}
     		else{
     			removeUmFilho( atual );
 			}
-    	}		
+		}
+				
     }    	
     
 void escreve(NODE* raiz){
@@ -239,16 +228,73 @@ void escreve_palavras() {
 		}
 	}
 }
+void conta_palavras(NODE *raiz, int *cont){
+		if( raiz == NULL ){
+		return;
+	}
+		conta_palavras(raiz->esq, cont);
+		*cont = *cont + 1;
+		conta_palavras(raiz->dir, cont);
+}
+void conta_ocorrencias(NODE *raiz, int *cont){
+		if( raiz == NULL ){
+		return;
+	}
+		conta_ocorrencias(raiz->esq, cont);
+		*cont = *cont + raiz->cont;
+		conta_ocorrencias(raiz->dir, cont);
+}
 
+void exibe_palavras_letra(NODE *raiz){
+		if( raiz == NULL ){
+		return;
+	}
+		exibe_palavras_letra(raiz->esq);
+		printf("%s\n", raiz->palavra);
+		exibe_palavras_letra(raiz->dir);
+}
+void escreve_uma_ocorr(NODE *raiz) {
+		if( raiz == NULL ){
+		return;
+	}
+		escreve_uma_ocorr(raiz->esq);
+		if(raiz->cont == 1){
+		printf("%s\n", raiz->palavra);
+		}
+		escreve_uma_ocorr(raiz->dir);
+}
+void procura_cont_max(NODE* raiz){
+	if( raiz == NULL ){
+		return;
+	}
+		procura_cont_max(raiz->esq);
+		if(maior_cont < raiz->cont){
+			maior_cont = raiz->cont;
+		}
+		procura_cont_max(raiz->dir);
+}
+
+void escreve_cont_max(NODE* raiz){
+		if( raiz == NULL ){
+		return;
+	}
+		escreve_cont_max(raiz->esq);
+		if(maior_cont == raiz->cont){
+			printf("%s\n", raiz->palavra);
+		}
+		escreve_cont_max(raiz->dir);
+}
 
 int main() {
 	int i;
 	char palavra[50];
+	char v;
 	for(i=0;i<26;i++){
 		vet_l[i].c = 'A' + i;
 		vet_l[i].prox = NULL;
 	}
 	int op = -1;
+	int cont = 0;
 	while(op != 0){
 		mostrar_opcoes();
 		printf("Digite o numero da opcao: ");
@@ -277,27 +323,56 @@ int main() {
 				printf("Digite a palavra a ser removida: ");
 				gets(palavra);
 				remover(palavra);
-				printf("Palavra '%s' removida com sucesso", palavra);
+				printf("Palavra '%s' removida com sucesso\n", palavra);
 				break;
 			case 4:
-//				printf("\nQuantidade de palavras: %d\n\n", cont_palavras);
+				cont = 0;
+				for(i=0; i<26; i++){
+					if(vet_l[i].prox != NULL){
+						conta_palavras(vet_l[i].prox, &cont);
+					}
+				}
+				printf("Numero de palavras: %d\n", cont);
 				break;
 			case 5:
-//				conta_ocorrencias();
+				cont = 0;
+				for(i=0; i<26; i++){
+					if(vet_l[i].prox != NULL){
+						conta_ocorrencias(vet_l[i].prox, &cont);
+					}
+				}
+				printf("Numero total de ocorrencias: %d\n", cont);
 				break;
 			case 6:
 				escreve_palavras();
 				printf("\n");
 				break;
 			case 7:
-//				exibe_palavras_letra();
+				getchar();
+				printf("Digite a letra: ");
+				scanf("%c", &v);
+				v = toupper(v);
+				i = v - 'A';
+				exibe_palavras_letra(vet_l[i].prox);
+				printf("\n");
 				break;
 			case 8:
-//				escreve_maior_freq();
+				maior_cont = 0;
+				for(i=0; i<26; i++){
+					procura_cont_max(vet_l[i].prox);
+				}
+				printf("\nMaior cont: %d\n", maior_cont);
+				for(i=0; i<26; i++){
+					escreve_cont_max(vet_l[i].prox);
+				}
 				printf("\n");
 				break;
 			case 9:
-//				exibe_palavras_uma_freq();
+				for(i=0; i<26; i++){
+					if(vet_l[i].prox != NULL){
+						escreve_uma_ocorr(vet_l[i].prox);
+					}
+				}
 				break;
 			case 10:
 				break;
