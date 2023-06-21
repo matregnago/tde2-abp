@@ -28,8 +28,8 @@ void mostrar_opcoes() {
 	printf("================================\n");
 	printf("  0. Sair\n");
 	printf("  1. Inserir palavra\n");
-//	printf("  2. Consultar Palavra\n");
-//	printf("  3. Remover Palavra\n");
+	printf("  2. Consultar Palavra\n");
+	printf("  3. Remover Palavra\n");
 //	printf("  4. Contar palavras\n");
 //	printf("  5. Conta ocorrencias\n");
 	printf("  6. Exibe palavras\n");
@@ -48,26 +48,26 @@ void teste_cont(int cont){
 }
 
 void insereNodo( NODE* atual, NODE* novo ){
-	  	if(strcmp(atual->palavra,novo->palavra) == 0){
-	  		atual->cont++;
-	  		teste_cont(atual->cont);
-	  		printf("Palavra '%s' ja existe, aumentando cont!\n", novo->palavra);
+	if(strcmp(atual->palavra,novo->palavra) == 0){
+	  	atual->cont++;
+	  	teste_cont(atual->cont);
+	  	printf("Palavra '%s' ja existe, aumentando cont!\n", novo->palavra);
+	  	cont_palavras++;
+	  	return;
+	}
+	else if( strcmp(novo->palavra,atual->palavra) == -1){
+		if( atual->esq == NULL ){
+			atual->esq = novo;
+	 		atual->esq->pai = atual; //seta o pai
+	 		printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
 	  		cont_palavras++;
-	  		return;
-		}
-		else if( strcmp(novo->palavra,atual->palavra) == -1){
-	  		if( atual->esq == NULL ){
-	  			atual->esq = novo;
-	  			atual->esq->pai = atual; //seta o pai
-	  			printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
-	  			cont_palavras++;
-	  		}
-	  		else{
-	  		  insereNodo( atual->esq, novo);
-			  }
 	  	}
-	  	else{	  
-	  		if( atual->dir == NULL){
+	  	else{
+	  		insereNodo( atual->esq, novo);
+		}
+	}
+	else{	  
+		if( atual->dir == NULL){
 	  			atual->dir = novo;
 	  			atual->dir->pai = atual;
 	  			printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
@@ -79,27 +79,147 @@ void insereNodo( NODE* atual, NODE* novo ){
 	    }
 }	
 	    
-   void insere_palavra(char palavra[50]){
-        NODE* novo;
-        NODE* raiz;
-        novo = (NODE*) malloc(sizeof(NODE));
-        strcpy(novo->palavra, palavra);
-        novo->esq = NULL;
-        novo->dir = NULL;
-        novo->pai = NULL;
-        novo->cont = 1;
-        char l = toupper(palavra[0]);
-        int r = l - 'A';
-		if(vet_l[r].prox == NULL){
-		  vet_l[r].prox = novo;
-		  printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
-		  cont_palavras++;
+void insere_palavra(char palavra[50]){
+	NODE* novo;
+    NODE* raiz;
+    novo = (NODE*) malloc(sizeof(NODE));
+    strcpy(novo->palavra, palavra);
+    novo->esq = NULL;
+    novo->dir = NULL;
+    novo->pai = NULL;
+    novo->cont = 1;
+    char l = toupper(palavra[0]);
+    int r = l - 'A';
+	if(vet_l[r].prox == NULL){
+		vet_l[r].prox = novo;
+		printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
+		cont_palavras++;
 	}
-		else{
+	else{
 		  insereNodo( vet_l[r].prox, novo );
-		}
 	}
 
+}
+	NODE* pesquisa( NODE* raiz, char palavra[50] ){		
+        NODE* res = NULL;
+		if( raiz != NULL ){
+            
+		  if(strcmp(raiz->palavra, palavra)==0){
+             res = raiz;
+          }
+          else{
+               if(strcmp(raiz->palavra, palavra) == 1){
+                    res = pesquisa( raiz->esq, palavra );
+               }
+               else{
+                    res = pesquisa( raiz->dir, palavra );
+               }
+          	}
+        }
+        return res;
+	}
+	NODE* pesquisaPalavra( char palavra[50] ){
+		char c = toupper(palavra[0]);
+		int i = c - 'A';
+		NODE* raiz = vet_l[i].prox;
+		NODE* rest = pesquisa( raiz, palavra );
+		return rest;
+	}
+	
+    void removeFolha(NODE* atual){
+		NODE* pai = atual->pai;
+		char aux[50];
+		strcpy(aux, atual->palavra);
+		char c = toupper(aux[0]);
+		int i = c - 'A';
+		NODE* raiz = vet_l[i].prox;
+		if(pai==NULL){ 
+			raiz = NULL;
+		}
+		else{
+			if(pai->esq == atual){
+				pai->esq = NULL;
+			}
+			else{
+				pai->dir=NULL;
+			}
+		}
+		free(atual);
+	}
+	void removeUmFilho( NODE* atual ){
+		NODE* pai = atual->pai;
+		char aux[50];
+		strcpy(aux, atual->palavra);
+		char c = toupper(aux[0]);
+		int i = c - 'A';
+		NODE* raiz = vet_l[i].prox;
+		if(pai==NULL){
+			if(atual->esq != NULL){
+				raiz = atual->esq;
+			}
+			else{
+				raiz = atual->dir;
+			}
+			raiz->pai=NULL;
+		}
+		else{
+			if(atual->esq == NULL){
+				if(pai->dir == atual){
+					pai->dir = atual->dir;
+				}
+				else{ 
+					pai->esq=atual->dir;
+				}
+				atual->dir->pai = pai;
+			}
+			else{ 
+				if(pai->dir==atual){
+					pai->dir=atual->esq;
+				}
+				else{ 
+					pai->esq=atual->esq;
+				}
+				atual->esq->pai = pai;
+			}
+            free(atual);	
+		}
+	} 
+	
+    void removeDoisFilhos( NODE* atual ){
+		NODE* aux = atual->esq;
+		NODE* pai = NULL;
+				
+		while(aux->dir!= NULL){
+			aux = aux->dir;
+		}
+		strcpy (atual->palavra, aux->palavra); 
+		if((aux->esq == NULL) && (aux->dir == NULL)){
+            removeFolha(aux);
+		}
+		else{
+            removeUmFilho(aux);
+		}				
+	}
+    void remover(char palavra[50]){
+    	NODE* atual;
+    	
+    	atual = pesquisaPalavra( palavra );
+    	if(atual == NULL){
+    		printf("A palavra %s nao esta presente. ", palavra);
+		}
+		else if((atual->esq == NULL) && (atual->dir == NULL)){
+    		removeFolha(atual);
+		}
+    	else{
+			if((atual->esq != NULL) && (atual->dir != NULL)){
+				removeDoisFilhos( atual );
+			}
+    		else{
+    			removeUmFilho( atual );
+			}
+    	}		
+    }    	
+    
 void escreve(NODE* raiz){
 	if( raiz == NULL ){
 		return;
@@ -146,10 +266,18 @@ int main() {
 				printf("\n");
 				break;
 			case 2:
-//				pesquisa_palavra();
+				getchar();
+				printf("Digite a palavra: ");
+				gets(palavra);
+				NODE* result = pesquisaPalavra(palavra);
+				printf("Palavra: %s\nCont: %d\n", result->palavra, result->cont);
 				break;
 			case 3:
-//				remover_palavra();
+				getchar();
+				printf("Digite a palavra a ser removida: ");
+				gets(palavra);
+				remover(palavra);
+				printf("Palavra '%s' removida com sucesso", palavra);
 				break;
 			case 4:
 //				printf("\nQuantidade de palavras: %d\n\n", cont_palavras);
