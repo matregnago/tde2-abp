@@ -27,15 +27,15 @@ void mostrar_opcoes() {
 	printf("================================\n");
 	printf("  0. Sair\n");
 	printf("  1. Inserir palavra\n");
-	printf("  2. Consultar Palavra\n");
-	printf("  3. Remover Palavra\n");
-	printf("  4. Contar palavras\n");
-	printf("  5. Conta ocorrencias\n");
-	printf("  6. Exibe palavras\n");
-	printf("  7. Exibe palavras letra\n");
-	printf("  8. Exibe palavras maior ocorren.\n");
-	printf("  9. Exibe palavras uma ocorren.\n");
-//	printf("  10. Extra?");
+	printf("  2. Inserir Frase\n");
+	printf("  3. Consultar Palavra\n");
+	printf("  4. Remover Palavra\n");
+	printf("  5. Contar palavras\n");
+	printf("  6. Conta ocorrencias\n");
+	printf("  7. Exibe palavras\n");
+	printf("  8. Exibe palavras letra\n");
+	printf("  9. Exibe palavras maior ocorrencia.\n");
+	printf("  10. Exibe palavras uma ocorrencia.\n");
 	printf("================================\n");
 	printf("\n");
 }
@@ -57,7 +57,7 @@ void insereNodo( NODE* atual, NODE* novo ){
 	  		insereNodo( atual->esq, novo);
 		}
 	}
-	else{	  
+	else{
 		if( atual->dir == NULL){
 	  			atual->dir = novo;
 	  			atual->dir->pai = atual;
@@ -67,8 +67,8 @@ void insereNodo( NODE* atual, NODE* novo ){
 	  		  insereNodo( atual->dir, novo );
 			  }
 	    }
-}	
-	    
+}
+
 void insere_palavra(char palavra[50]){
 	NODE* novo;
     NODE* raiz;
@@ -89,10 +89,10 @@ void insere_palavra(char palavra[50]){
 	}
 
 }
-	NODE* pesquisa( NODE* raiz, char palavra[50] ){		
+	NODE* pesquisa( NODE* raiz, char palavra[50] ){
         NODE* res = NULL;
 		if( raiz != NULL ){
-            
+
 		  if(strcmp(raiz->palavra, palavra)==0){
              res = raiz;
           }
@@ -114,14 +114,14 @@ void insere_palavra(char palavra[50]){
 		NODE* rest = pesquisa( raiz, palavra );
 		return rest;
 	}
-	
+
     void removeFolha(NODE* atual){
 		NODE* pai = atual->pai;
 		char aux[50];
 		strcpy(aux, atual->palavra);
 		char c = toupper(aux[0]);
 		int i = c - 'A';
-		if(pai==NULL){ 
+		if(pai==NULL){
 			vet_l[i].prox = NULL;
 		}
 		else{
@@ -155,42 +155,42 @@ void insere_palavra(char palavra[50]){
 				if(pai->dir == atual){
 					pai->dir = atual->dir;
 				}
-				else{ 
+				else{
 					pai->esq=atual->dir;
 				}
 				atual->dir->pai = pai;
 			}
-			else{ 
+			else{
 				if(pai->dir==atual){
 					pai->dir=atual->esq;
 				}
-				else{ 
+				else{
 					pai->esq=atual->esq;
 				}
 				atual->esq->pai = pai;
 			}
-            free(atual);	
+            free(atual);
 		}
-	} 
-	
+	}
+
     void removeDoisFilhos( NODE* atual ){
 		NODE* aux = atual->esq;
 		NODE* pai = NULL;
-				
+
 		while(aux->dir!= NULL){
 			aux = aux->dir;
 		}
-		strcpy (atual->palavra, aux->palavra); 
+		strcpy (atual->palavra, aux->palavra);
 		if((aux->esq == NULL) && (aux->dir == NULL)){
             removeFolha(aux);
 		}
 		else{
             removeUmFilho(aux);
-		}				
+		}
 	}
     void remover(char palavra[50]){
     	NODE* atual;
-    	
+
     	atual = pesquisaPalavra( palavra );
     	if(atual == NULL){
     		printf("A palavra %s nao esta presente. ", palavra);
@@ -206,9 +206,9 @@ void insere_palavra(char palavra[50]){
     			removeUmFilho( atual );
 			}
 		}
-				
-    }    	
-    
+
+    }
+
 void escreve(NODE* raiz){
 	if( raiz == NULL ){
 		return;
@@ -216,6 +216,42 @@ void escreve(NODE* raiz){
 		escreve(raiz->esq);
 		printf("%s\n",raiz->palavra);
 		escreve(raiz->dir);
+}
+
+void insere_frase(){
+    int i, j=0, k=0;
+    char frase[10000];
+    char palavra[100];
+   printf("Digite a frase: ");
+   getchar();
+   gets(frase);
+    printf("\nFrase: %s\n\n",frase);
+    while(frase[k]==' '){
+         k++;
+        }
+
+    for(i=k;frase[i]!='\0';i++){
+        if(frase[i]==',' || frase[i] == '.' || frase[i] == ' '|| frase[i]=='!' || frase[i]=='?' || frase[i]==':' || frase[i]==';'){
+            palavra[j+1] == '\0';
+            insere_palavra(palavra);
+            while(j!=0){
+                palavra[j] = '\0';
+                j--;
+            }
+            while(frase[i+1]==' '){
+            i++;
+            }
+        }
+        else{
+            palavra[j]=frase[i];
+            j++;
+        }
+    }
+    if(strcmp(palavra, "\0")){
+    palavra[j+1] == '\0';
+    insere_palavra(palavra);
+    }
+    printf("\n");
 }
 
 
@@ -312,20 +348,23 @@ int main() {
 				printf("\n");
 				break;
 			case 2:
+			    insere_frase();
+				break;
+			case 3:
 				getchar();
 				printf("Digite a palavra: ");
 				gets(palavra);
 				NODE* result = pesquisaPalavra(palavra);
 				printf("Palavra: %s\nCont: %d\n", result->palavra, result->cont);
 				break;
-			case 3:
+			case 4:
 				getchar();
 				printf("Digite a palavra a ser removida: ");
 				gets(palavra);
 				remover(palavra);
 				printf("Palavra '%s' removida com sucesso\n", palavra);
 				break;
-			case 4:
+			case 5:
 				cont = 0;
 				for(i=0; i<26; i++){
 					if(vet_l[i].prox != NULL){
@@ -334,7 +373,7 @@ int main() {
 				}
 				printf("Numero de palavras: %d\n", cont);
 				break;
-			case 5:
+			case 6:
 				cont = 0;
 				for(i=0; i<26; i++){
 					if(vet_l[i].prox != NULL){
@@ -343,11 +382,11 @@ int main() {
 				}
 				printf("Numero total de ocorrencias: %d\n", cont);
 				break;
-			case 6:
+			case 7:
 				escreve_palavras();
 				printf("\n");
 				break;
-			case 7:
+			case 8:
 				getchar();
 				printf("Digite a letra: ");
 				scanf("%c", &v);
@@ -356,7 +395,7 @@ int main() {
 				exibe_palavras_letra(vet_l[i].prox);
 				printf("\n");
 				break;
-			case 8:
+			case 9:
 				maior_cont = 0;
 				for(i=0; i<26; i++){
 					procura_cont_max(vet_l[i].prox);
@@ -367,18 +406,16 @@ int main() {
 				}
 				printf("\n");
 				break;
-			case 9:
+			case 10:
 				for(i=0; i<26; i++){
 					if(vet_l[i].prox != NULL){
 						escreve_uma_ocorr(vet_l[i].prox);
 					}
 				}
 				break;
-			case 10:
-				break;
 			default:
 				printf("Digite uma opcao entre 0-10");
 				break;
 		}
 	}
-}                       
+}
