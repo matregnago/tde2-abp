@@ -57,7 +57,7 @@ void insereNodo(NODE *atual, NODE *novo)
 		if (atual->esq == NULL)
 		{
 			atual->esq = novo;
-			atual->esq->pai = atual;	//seta o pai
+			atual->esq->pai = atual;
 			printf("Palavra '%s' inserida com sucesso!\n", novo->palavra);
 		}
 		else
