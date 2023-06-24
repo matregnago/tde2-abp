@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <conio.h>
 
 struct node
 {
@@ -294,7 +293,7 @@ void insere_frase()
 	{
 		if (frase[i] == ',' || frase[i] == '.' || frase[i] == ' ' || frase[i] == '!' || frase[i] == '?' || frase[i] == ':' || frase[i] == ';')
 		{
-			palavra[j + 1] == '\0';
+			palavra[j + 1] = '\0';
 			insere_palavra(palavra);
 			while (j != 0)
 			{
@@ -318,12 +317,6 @@ void insere_frase()
 	{
 		palavra[j + 1] == '\0';
 		insere_palavra(palavra);
-	}
-
-	while (j != 0)
-	{
-		palavra[j] = '\0';
-		j--;
 	}
 
 	printf("\n");
